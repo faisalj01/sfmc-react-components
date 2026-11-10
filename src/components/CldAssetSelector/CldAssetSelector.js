@@ -47,6 +47,7 @@ export default function CldAssetSelector({
   // Guards against retrying forever if a freshly-signed preview URL somehow
   // also fails to load — one refresh attempt per selected asset.
   const refreshAttempted = useRef(false);
+  const refreshedPublicId = useRef(null);
 
   function thumbnailUrl(value) {
     let trns = {
@@ -63,7 +64,11 @@ export default function CldAssetSelector({
 
   // Lifecycle updates
   useEffect(() => {
-    refreshAttempted.current = false;
+    const publicId = props.value ? props.value.public_id : null;
+    if (refreshedPublicId.current !== publicId) {
+      refreshedPublicId.current = publicId;
+      refreshAttempted.current = false;
+    }
     if (props.value && (props.value.secure_url || props.value.embargoPreviewUrl)) {
       if (props.value.derived && props.value.derived.length > 0) {
         setMlTransformations(props.value.derived[0].raw_transformation);

@@ -84,6 +84,46 @@ describe('embargo preview refresh', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it('does not refresh again when the refreshed preview also fails to load', async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        url: 'https://res.cloudinary.com/demo/image/upload/signed-refreshed/pub.jpg',
+        previewToken: '__cld_token__=exp=2~acl=x~hmac=y',
+        embargoLiftsAt: '2026-12-01T00:00:00.000Z',
+        accessControl: { access_type: 'token' }
+      })
+    });
+    function Harness() {
+      const [value, setValue] = React.useState({
+        public_id: 'pub',
+        resource_type: 'image',
+        type: 'upload',
+        embargoPreviewUrl: 'https://res.cloudinary.com/demo/image/upload/signed-expired/pub.jpg',
+        accessControl: { access_type: 'token' }
+      });
+      return (
+        <CldAssetSelector
+          value={value}
+          setValue={(next) => next !== value && setValue(next)}
+          previewServerUrl="https://preview.example.com"
+        />
+      );
+    }
+    render(<Harness />);
+    fireEvent.error(document.querySelector('img.preview-img'));
+
+    await waitFor(() => {
+      expect(document.querySelector('img.preview-img').src).toContain('signed-refreshed');
+    });
+    fireEvent.error(document.querySelector('img.preview-img'));
+
+    await waitFor(() => {
+      expect(document.querySelector('img.preview-img').src).toContain('PageDesigner/warning.png');
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   it('does not attempt a refresh when no previewServerUrl is configured', () => {
     const mockValue = {
       public_id: 'pub',

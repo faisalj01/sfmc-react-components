@@ -440,6 +440,12 @@ describe('embargoPreviewSourceUrl', () => {
     expect(embargoPreviewSourceUrl(`${imageUrl}?_i=AI`, { token })).toBe(`${imageUrl}?_i=AI&${token}`);
   });
 
+  it('adds the asset format so the url matches the preview token acl', () => {
+    expect(embargoPreviewSourceUrl(`${imageUrl}?_i=AI`, { token, format: 'jpg' })).toBe(
+      `${imageUrl}.jpg?_i=AI&${token}`
+    );
+  });
+
   it('falls back to the signed original, then the plain url', () => {
     expect(embargoPreviewSourceUrl(imageUrl, { url: 'signed' })).toBe('signed');
     expect(embargoPreviewSourceUrl(imageUrl, { url: undefined, token: undefined })).toBe(imageUrl);

@@ -170,10 +170,17 @@ export function createApp({
         secure: true
       });
       const cloudName = cloudinary.config().cloud_name;
+      const asset = `${publicId}.${resource.format}`;
+      const deliveryPath = `/${resourceType}/${deliveryType}`;
       previewToken = cloudinary.utils.generate_auth_token({
         key: accessControlKey,
         duration: previewTtlSeconds,
-        acl: `/${cloudName}/${resourceType}/${deliveryType}/*${publicId}*`
+        acl: [
+          `/${cloudName}${deliveryPath}/${asset}`,
+          `/${cloudName}${deliveryPath}/*/${asset}`,
+          `${deliveryPath}/${asset}`,
+          `${deliveryPath}/*/${asset}`
+        ]
       });
     } catch (err) {
       const message = describeCloudinaryError(err);

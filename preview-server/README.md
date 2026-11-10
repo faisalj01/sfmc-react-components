@@ -42,7 +42,8 @@ Copy `.env.example` to `.env` and fill in:
   any client-facing config; it never leaves this service.
 - `ALLOWED_ORIGINS` — comma-separated list of origins allowed to call this
   service (the deployed `cloudinary-sfmc` app's origin(s)). Leave empty only
-  for local development.
+  for local development. With `NODE_ENV=production` the server refuses to
+  start without it.
 - `PREVIEW_TTL_SECONDS` — how long a signed preview URL stays valid. Keep
   this short: it only needs to survive one editor session.
 

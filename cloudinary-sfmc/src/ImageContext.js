@@ -195,7 +195,11 @@ export default function ImageContextProvider({
         { width: width, height: height },
         setTransformationError,
         errorImageUrl,
-        asset && { url: asset.embargoPreviewUrl, token: asset.embargoPreviewToken }
+        asset && {
+          url: asset.embargoPreviewUrl,
+          token: asset.embargoPreviewToken,
+          format: asset.format
+        }
       );
       if (previewHtml) {
         setPreviewCnt(previewHtml);

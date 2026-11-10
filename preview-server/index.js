@@ -22,6 +22,12 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+  // eslint-disable-next-line no-console
+  console.error('ALLOWED_ORIGINS must be set in production. Refusing to start.');
+  process.exit(1);
+}
+
 const app = createApp({
   cloudinary,
   accessControlKey: trimmedEnv('CLOUDINARY_ACCESS_CONTROL_KEY'),

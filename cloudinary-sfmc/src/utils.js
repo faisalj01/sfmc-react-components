@@ -217,7 +217,9 @@ async function getGifHead(url) {
 
 export function embargoPreviewSourceUrl(imageUrl, embargoPreview) {
   if (embargoPreview && embargoPreview.token) {
-    return `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}${embargoPreview.token}`;
+    const [path, query] = imageUrl.split('?');
+    const source = embargoPreview.format ? `${path}.${embargoPreview.format}` : path;
+    return `${source}?${query ? `${query}&` : ''}${embargoPreview.token}`;
   }
   return (embargoPreview && embargoPreview.url) || imageUrl;
 }

@@ -9,7 +9,8 @@ function fakeCloudinary({ resource, urlResult = 'https://res.cloudinary.com/demo
   return {
     config: () => ({ cloud_name: 'demo' }),
     utils: {
-      generate_auth_token: ({ acl }) => `__cld_token__=exp=1~acl=${encodeURIComponent(acl)}~hmac=x`
+      generate_auth_token: ({ acl }) =>
+        `__cld_token__=exp=1~acl=${encodeURIComponent([].concat(acl).join('!'))}~hmac=x`
     },
     api: {
       resource: async () => {
@@ -82,6 +83,7 @@ test('embargoLiftsAt returns the earliest future anonymous start, or null', () =
 test('POST /api/embargo-preview-url returns a signed url for a token-restricted asset', async () => {
   const resource = {
     public_id: 'demo/hero',
+    format: 'jpg',
     access_control: [{ access_type: 'token' }, { access_type: 'anonymous', start: FUTURE }]
   };
   const app = createApp({
@@ -101,10 +103,13 @@ test('POST /api/embargo-preview-url returns a signed url for a token-restricted 
     assert.equal(body.accessControl.access_type, 'token');
     assert.equal(body.status, 'embargoed');
     assert.equal(body.embargoLiftsAt, FUTURE);
-    assert.ok(
-      body.previewToken.includes(encodeURIComponent('/demo/image/upload/*demo/hero*')),
-      body.previewToken
-    );
+    const acl = decodeURIComponent(body.previewToken.match(/acl=([^~]+)/)[1]).split('!');
+    assert.deepEqual(acl, [
+      '/demo/image/upload/demo/hero.jpg',
+      '/demo/image/upload/*/demo/hero.jpg',
+      '/image/upload/demo/hero.jpg',
+      '/image/upload/*/demo/hero.jpg'
+    ]);
   });
 });
 
